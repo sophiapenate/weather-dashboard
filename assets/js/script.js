@@ -25,10 +25,8 @@ var displayWeatherData = function(data, el) {
     // display temp
     var tempEl = document.createElement("p");
     var temp = data.temp.day;
-    console.log(temp);
     // if temp not set, get from outside array instead
     if (!temp) { temp = data.temp; }
-    console.log(temp);
     tempEl.textContent = "Temp: " + Math.round(temp) + "°";
     el.appendChild(tempEl);
 
@@ -67,10 +65,26 @@ var updateDashboard = function(cityData, weatherData) {
     // display current weather data
     displayWeatherData(weatherData.current, currentWeatherEl);
 
-    // display UV index on current weather only
+    // create el for current UV Index
     var uvEl = document.createElement("p");
-    uvEl.textContent = "UV Index: " + weatherData.current.uvi;
+    uvEl.innerHTML = "UV Index: ";
+    // create span for current UV Index
+    var uvi = weatherData.current.uvi;
+    var uvSpan = document.createElement("span");
+    uvSpan.classList = "px-2 py-1 rounded text-white";
+    uvSpan.textContent = uvi;
+    // color code UV Index
+    if (uvi <= 2) {
+        uvSpan.classList.add("bg-success");
+    } else if (uvi <= 5) {
+        uvSpan.classList.add("bg-warning");
+    } else {
+        uvSpan.classList.add("bg-danger");
+    }
+    uvEl.appendChild(uvSpan);
+    // append UV Index to current weather only
     currentWeatherEl.appendChild(uvEl);
+    
 
     // append current weather to DOM
     weatherReportEl.appendChild(currentWeatherEl);
