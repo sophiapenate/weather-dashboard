@@ -4,7 +4,7 @@ var searchInputEl = document.querySelector("#search-input")
 var weatherReportEl = document.querySelector("#weather-report");
 
 
-var displayWeather = function(data, el) {
+var displayWeatherData = function(data, el) {
     // display date
     var dateEl = document.createElement("h3");
     var date = new Date(data.dt * 1000);
@@ -24,7 +24,12 @@ var displayWeather = function(data, el) {
 
     // display temp
     var tempEl = document.createElement("p");
-    tempEl.textContent = "Temp: " + Math.round(data.temp) + "°";
+    var temp = data.temp.day;
+    console.log(temp);
+    // if temp not set, get from outside array instead
+    if (!temp) { temp = data.temp; }
+    console.log(temp);
+    tempEl.textContent = "Temp: " + Math.round(temp) + "°";
     el.appendChild(tempEl);
 
     // display humidity
@@ -42,7 +47,12 @@ var displayWeather = function(data, el) {
 var updateDashboard = function(cityData, weatherData) {
     console.log(cityData, weatherData);
     // clear weather report
-    weatherReportEl.textContent = "";
+    weatherReportEl.innerHTML = "";
+
+    // create current weather el
+    var currentWeatherEl = document.createElement("div");
+    currentWeatherEl.setAttribute("id", "current-weather");
+    currentWeatherEl.classList = "row";
 
     // display city name
     var cityNameEl = document.createElement("h2");
@@ -52,42 +62,57 @@ var updateDashboard = function(cityData, weatherData) {
     } else {
         cityNameEl.textContent = cityData.name + ", " + cityData.country;
     }
-    weatherReportEl.appendChild(cityNameEl);
+    currentWeatherEl.appendChild(cityNameEl);
 
-    // display today's weather
-    var todaysWeatherEl = document.createElement("div");
-    todaysWeatherEl.setAttribute("id", "todays-weather");
-    displayWeather(weatherData.current, todaysWeatherEl);
+    // display current weather data
+    displayWeatherData(weatherData.current, currentWeatherEl);
 
-    // display UV index on today's weather only
+    // display UV index on current weather only
     var uvEl = document.createElement("p");
     uvEl.textContent = "UV Index: " + weatherData.current.uvi;
-    todaysWeatherEl.appendChild(uvEl);
+    currentWeatherEl.appendChild(uvEl);
 
-    // append today's weather to DOM
-    weatherReportEl.appendChild(todaysWeatherEl);
+    // append current weather to DOM
+    weatherReportEl.appendChild(currentWeatherEl);
+
+    // create forcast el
+    var forcastEl = document.createElement("div");
+    forcastEl.setAttribute("id", "forcast");
+    forcastEl.classList = "row";
+
+    // display forcased weather for next 5 days
+    for (var i = 1; i < 5; i++) {
+        var singleDayForecastEl = document.createElement("div");
+        singleDayForecastEl.classList = "col";
+        displayWeatherData(weatherData.daily[i], singleDayForecastEl);
+        forcastEl.appendChild(singleDayForecastEl);
+    }
+
+    // append forcast to DOM
+    weatherReportEl.appendChild(forcastEl);
+    
 }
 
 // fetch weather data from fetched city data
-var getWeatherData = function(cityData) {
+var fetchWeatherData = function(cityData) {
     var apiURL = "https://api.openweathermap.org/data/2.5/onecall?units=imperial&lat=" + cityData.lat + "&lon=" + cityData.lon + "&appid=" + apiKey;
     fetch(apiURL).then(function(response) {
         response.json().then(function(weatherData) {
-            // push city and weather data to display data
+            // push city and weather data to dashboard
             updateDashboard(cityData, weatherData);
         })
     });
 }
 
 // fetch city data from user input search
-var getCityData = function(searchedString) {
+var fetchCityData = function(searchedString) {
     var apiURL = "http://api.openweathermap.org/geo/1.0/direct?q=" + searchedString + "&appid=" + apiKey;
     fetch(apiURL).then(function(response) {
         response.json().then(function(cityData) {
             // check if city found
             if (cityData.length > 0) {
                 // use city data to get weather data
-                getWeatherData(cityData[0]);
+                fetchWeatherData(cityData[0]);
             }
         })
     })
@@ -96,7 +121,7 @@ var getCityData = function(searchedString) {
 var searchFormHandler = function(event) {
     event.preventDefault();
     var searchedString = searchInputEl.value.trim();
-    getCityData(searchedString);
+    fetchCityData(searchedString);
 }
 
 searchFormEl.addEventListener("submit", searchFormHandler);
