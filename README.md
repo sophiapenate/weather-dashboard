@@ -4,7 +4,7 @@
 Weather dashboard to search for weather reports in multiple cities.
 
 ## Screenshot
-![Screenshot of live weather dashboard](.assets/images/screenshot.png)
+![Screenshot of live weather dashboard](./assets/images/screenshot.png)
 
 ## Link to Live Application
 https://sophiabarrett.github.io/weather-dashboard/
