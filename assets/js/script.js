@@ -174,7 +174,7 @@ var fetchWeatherData = function(cityName, lat, lon) {
 
 // fetch city data from user input search
 var fetchCityData = function(searchedString) {
-    var apiURL = "http://api.openweathermap.org/geo/1.0/direct?q=" + searchedString + "&appid=" + apiKey;
+    var apiURL = "https://api.openweathermap.org/geo/1.0/direct?q=" + searchedString + "&appid=" + apiKey;
     fetch(apiURL).then(function(response) {
         response.json().then(function(cityData) {
             // check if city found
