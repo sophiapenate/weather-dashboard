@@ -8,6 +8,7 @@ var searchHistory = [];
 var populateSearchHistory = function() {
     // reset searchHistoryEl
     searchHistoryEl.innerHTML = "";
+
     // update searchHistory array from localStorage
     searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
     // if no search history exists in local storage, reset array and return out of function
@@ -15,8 +16,10 @@ var populateSearchHistory = function() {
         searchHistory = [];
         return false;
     }
+
     // update dashboard with most recent search
     fetchWeatherData(searchHistory[0].name, searchHistory[0].lat, searchHistory[0].lon);
+
     // loop through searchHistory array and create buttons for each saved city
     for (var i = 0; i < searchHistory.length; i++) {
         var btn = document.createElement("button");
@@ -24,6 +27,7 @@ var populateSearchHistory = function() {
         btn.setAttribute("data-index", i);
         btn.setAttribute("data-lat", searchHistory[i].lat);
         btn.setAttribute("data-lon", searchHistory[i].lon);
+        btn.classList = "btn btn-primary";
         searchHistoryEl.appendChild(btn);
     }
 }
@@ -59,6 +63,7 @@ var populateWeatherData = function(data, el, options) {
     var iconEl = document.createElement("img");
     iconEl.setAttribute("src", "https://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png");
     iconEl.setAttribute("alt", data.weather[0].description);
+    iconEl.classList = "weather-icon";
     el.appendChild(iconEl);
 
     // populate temperature
@@ -109,10 +114,16 @@ var updateDashboard = function(cityName, weatherData) {
     // clear weather report el
     weatherReportEl.innerHTML = "";
 
-    // create current weather el
+    // create current weather row, col and el
+    var currentWeatherRow = document.createElement("div");
+    currentWeatherRow.setAttribute("id", "current-weather");
+    currentWeatherRow.classList = "row mb-4";
+    var currentWeatherCol = document.createElement("div");
+    currentWeatherCol.classList = "col-12";
+    currentWeatherRow.appendChild(currentWeatherCol);
     var currentWeatherEl = document.createElement("div");
-    currentWeatherEl.setAttribute("id", "current-weather");
-    currentWeatherEl.classList = "row";
+    currentWeatherEl.classList = "bg-info p-4 rounded";
+    currentWeatherCol.appendChild(currentWeatherEl);
 
     // populate city name
     var cityNameEl = document.createElement("h2");
@@ -125,24 +136,28 @@ var updateDashboard = function(cityName, weatherData) {
         "include uvi"
     ];
     populateWeatherData(weatherData.current, currentWeatherEl, currentWeatherOptions);
+    
     // append current weather to DOM
-    weatherReportEl.appendChild(currentWeatherEl);
+    weatherReportEl.appendChild(currentWeatherRow);
 
-    // create forcast el
-    var forcastEl = document.createElement("div");
-    forcastEl.setAttribute("id", "forcast");
-    forcastEl.classList = "row";
+    // create forecast el
+    var forecastEl = document.createElement("div");
+    forecastEl.setAttribute("id", "forecast");
+    forecastEl.classList = "row";
 
-    // populate forcased weather for next 5 days
+    // populate forecasted weather for next 5 days
     for (var i = 1; i <= 5; i++) {
+        var forecastCol = document.createElement("div");
+        forecastCol.classList = "col-12 col-sm-6 col-lg-4 mb-3";
+        forecastEl.appendChild(forecastCol);
         var singleDayForecastEl = document.createElement("div");
-        singleDayForecastEl.classList = "col";
+        singleDayForecastEl.classList = "w-100 h-100 bg-secondary p-3 rounded";
         populateWeatherData(weatherData.daily[i], singleDayForecastEl);
-        forcastEl.appendChild(singleDayForecastEl);
+        forecastCol.appendChild(singleDayForecastEl);
     }
 
-    // append forcast to DOM
-    weatherReportEl.appendChild(forcastEl);   
+    // append forecast to DOM
+    weatherReportEl.appendChild(forecastEl);   
 }
 
 // fetch weather data from fetched city data
@@ -172,6 +187,8 @@ var fetchCityData = function(searchedString) {
                 // push city data to function to fetch weather data
                 fetchWeatherData(cityName, cityData[0].lat, cityData[0].lon);
                 saveSearchedCity(cityName, cityData[0].lat, cityData[0].lon);
+            } else {
+                alert("City not found, try again.");
             }
         })
     })
@@ -183,11 +200,7 @@ var searchFormHandler = function(event) {
     fetchCityData(searchedString);
 }
 
-populateSearchHistory();
-
-searchFormEl.addEventListener("submit", searchFormHandler);
-
-searchHistoryEl.addEventListener("click", function(event) {
+var searchBtnHandler = function(event) {
     if (event.target.matches("button")) {
         var cityName = event.target.textContent;
         var lat = event.target.getAttribute("data-lat");
@@ -198,4 +211,10 @@ searchHistoryEl.addEventListener("click", function(event) {
         searchHistory.splice(index, 1);
         saveSearchedCity(cityName, lat, lon);
     }
-});
+}
+
+populateSearchHistory();
+
+searchFormEl.addEventListener("submit", searchFormHandler);
+
+searchHistoryEl.addEventListener("click", searchBtnHandler);
