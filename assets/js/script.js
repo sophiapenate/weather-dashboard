@@ -192,6 +192,10 @@ searchHistoryEl.addEventListener("click", function(event) {
         var cityName = event.target.textContent;
         var lat = event.target.getAttribute("data-lat");
         var lon = event.target.getAttribute("data-lon");
+        var index = event.target.getAttribute("data-index");
         fetchWeatherData(cityName, lat, lon);
+        // remove city from current index in search history array, and re-add at top
+        searchHistory.splice(index, 1);
+        saveSearchedCity(cityName, lat, lon);
     }
 });
