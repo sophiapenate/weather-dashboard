@@ -13,6 +13,7 @@ var populateSearchHistory = function() {
     searchHistory = JSON.parse(localStorage.getItem("searchHistory"));
     // if no search history exists in local storage, reset array and return out of function
     if (!searchHistory) {
+        searchHistoryEl.innerHTML = "<p>You don't have any recent searches. Type in a city above to get started!</p>";
         searchHistory = [];
         return false;
     }
